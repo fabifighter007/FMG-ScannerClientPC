@@ -10,6 +10,7 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.swing.JOptionPane;
@@ -38,39 +39,21 @@ public class Main extends Application {
 	private List<File> datein = new ArrayList<>();
 	private ObservableList<File> list = FXCollections.observableArrayList(datein);
 	
+	public static ObservableList<File> tableData;
+
+	
 	@Override
 	public void start(Stage primaryStage) {
 		try {
+			Programm p = new Programm();
+			new UiEditor(p, new Liste());
 			
-			Stage window = new Stage();
-		    window.setTitle("Scanner");
-		    BorderPane bPLaunch = new BorderPane();
-		    
-		    ListView<File> l = new ListView<>();
-		    l.setItems(list);
-		    
-		    list.addListener((ListChangeListener<File>) change -> {
-	            while (change.next()) {
-	            	System.out.println("Waiting");
-	                if (change.wasAdded()) {
-	                    System.out.println(change.getAddedSubList().get(0)
-	                            + " was added to the list!");
-	                } else if (change.wasRemoved()) {
-	                    System.out.println(change.getRemoved().get(0)
-	                            + " was removed from the list!");
-	                }
-	            }
-	        });
-		    
-		    
-	        l.setOnMouseClicked(e -> {
-	        	System.out.println("Klicked");
-	        });
-		    
 
-		    
-		    
-			
+			p.getFilesFromServer();
+			File files[] = getFiles(new File("/files"));
+			for(int i =0;i<files.length;i++) {
+				tableData.add(files[i]);
+			}
 		    /*
 			//MENU
 		    MenuBar mBLaunch = new MenuBar();
@@ -82,11 +65,11 @@ public class Main extends Application {
 		    */
 		    
 	        Button uploadBtn = new Button();
-	        uploadBtn.setText("synchronisieren");
+	        uploadBtn.setText("editieren");
 	        uploadBtn.setOnAction(new EventHandler<ActionEvent>() {            
 	            @Override
 	            public void handle(ActionEvent event) {
-
+	            	new UiEditor(new Programm(), new Liste());
 
 	            }
 	        });
@@ -96,12 +79,10 @@ public class Main extends Application {
 	        searchBtn.setOnAction(new EventHandler<ActionEvent>() {            
 	            @Override
 	            public void handle(ActionEvent event) {
-	            	File f = locateFile(bPLaunch);
+	            	File f = locateFile(null);
 	            	System.out.println(f);
 	            	if(f.exists() && f.isFile() && f.getName().toLowerCase().endsWith(".csv")) {
 	            		list.add(f);
-		            	l.refresh();
-		        		sendFileToServer(f);
 	            	} else {
 	            		JOptionPane.showMessageDialog(null, "Ungültige Datei. Bitte erneut versuchen.\nNur Datein im Format .csv sind erlaubt.");
 	            	}
@@ -109,11 +90,15 @@ public class Main extends Application {
 	            }
 	        });
 	        
+	        
+	        
 	        HBox btnBox = addHBox();
 	        btnBox.setStyle("-fx-background-color: #1300ff;");
 	        btnBox.getChildren().add(uploadBtn);
 	        btnBox.getChildren().add(searchBtn);
 	        
+	        
+	        /*
 		    bPLaunch.setBottom(btnBox);
 		    
 		    
@@ -125,7 +110,7 @@ public class Main extends Application {
 		    window.setMinWidth(500);
 		    window.show();
 			
-			
+			*/
 			
 		} catch(Exception e) {
 			e.printStackTrace();
@@ -155,57 +140,13 @@ public class Main extends Application {
 	    return chooser.showOpenDialog(root.getScene().getWindow());
 	}
 	
-	public static void sendFileToServer(File file) {
-		Socket socket = null;
-	 	@SuppressWarnings("unused")
-		InputStream in = null;
-		BufferedOutputStream out = null;
-		try {
-			socket = new Socket(ip, port);
-			out = new BufferedOutputStream(socket.getOutputStream());
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		
-		try (DataOutputStream d = new DataOutputStream(out)) {
-		    d.writeUTF(file.getName());
-		    Files.copy(file.toPath(), d);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-	
-	public static void sendFileToServerALT() {		
-		 	Socket socket = null;
-		 	InputStream in = null;
-		 	OutputStream out = null;
-	        try {
-				socket = new Socket(ip, port);
-		        File file = new File(s);
-		        // Get the size of the file
-		        @SuppressWarnings("unused")
-				long length = file.length();
-		        byte[] bytes = new byte[16 * 1024];
-		        in = new FileInputStream(file);
-		        out = socket.getOutputStream();
-
-		        int count;
-		        while ((count = in.read(bytes)) > 0) {
-		            out.write(bytes, 0, count);
-		        }
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} finally {
-				try {
-					 out.close();
-				     in.close();
-				     socket.close();
-				} catch(IOException e) {
-					e.printStackTrace();
-				}
-			}
-	}
+	  public static File[] getFiles(final File folder) {
+		  File f = new File("files");
+		  ArrayList<File> files = new ArrayList<File>(Arrays.asList(f.listFiles()));
+		  
+		  File[] res = new File[files.size()];
+		  res = files.toArray(res);
+		  
+		  return res;
+	  }
 }
