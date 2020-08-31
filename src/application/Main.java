@@ -41,10 +41,13 @@ public class Main extends Application {
 			
 
 			p.getFilesFromServer();
+		
+			/*
 			File files[] = getFiles(new File("/files"));
 			for(int i =0;i<files.length;i++) {
 				tableData.add(files[i]);
 			}
+			*/
 			
 		    /*
 			//MENU
@@ -80,9 +83,7 @@ public class Main extends Application {
 	            	}
 	            	
 	            }
-	        });
-	        
-	        
+	        });	        
 	        
 	        HBox btnBox = addHBox();
 	        btnBox.setStyle("-fx-background-color: #1300ff;");
@@ -91,9 +92,7 @@ public class Main extends Application {
 	        
 	        
 	        /*
-		    bPLaunch.setBottom(btnBox);
-		    
-		    
+		    bPLaunch.setBottom(btnBox);	    
 		    bPLaunch.setCenter(l);
 		    //bPLaunch.setTop(mBLaunch);
 		    Scene launch = new Scene(bPLaunch);

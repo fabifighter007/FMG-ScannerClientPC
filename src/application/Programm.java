@@ -15,6 +15,8 @@ import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import javax.net.ssl.SSLSocket;
+
 public class Programm {
 	
 	private static final String ip = "192.168.178.63";
@@ -80,19 +82,21 @@ public class Programm {
 			int filesCount = dis.readInt();
 			File[] files = new File[filesCount];
 
-			for(int i = 0; i < filesCount; i++) {
-			    long fileLength = dis.readLong();
-			    String fileName = dis.readUTF();
-
-			    files[i] = new File("files/" + fileName);
-
-			    FileOutputStream fos = new FileOutputStream(files[i]);
-			    BufferedOutputStream bos = new BufferedOutputStream(fos);
-
-			    for(int j = 0; j < fileLength; j++) bos.write(bis.read());
-
-			    bos.close();
-			    fos.close();
+			for(int i = 0; i <= filesCount; i++ ) {
+				if(i!=0) {
+				    long fileLength = dis.readLong();
+				    String fileName = dis.readUTF();
+	
+				    files[i] = new File("files/" + fileName);
+	
+				    FileOutputStream fos = new FileOutputStream(files[i]);
+				    BufferedOutputStream bos = new BufferedOutputStream(fos);
+	
+				    for(int j = 0; j < fileLength; j++) bos.write(bis.read());
+	
+				    bos.close();
+				    fos.close();
+				}
 			}
 			dis.close();
 			bis.close();
