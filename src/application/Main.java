@@ -42,12 +42,11 @@ public class Main extends Application {
 
 			p.getFilesFromServer();
 		
-			/*
+			
 			File files[] = getFiles(new File("/files"));
 			for(int i =0;i<files.length;i++) {
 				tableData.add(files[i]);
 			}
-			*/
 			
 		    /*
 			//MENU
@@ -58,50 +57,9 @@ public class Main extends Application {
 		    fileLaunch.getItems().addAll(saveLaunch, new SeparatorMenuItem(), exitLaunch);
 		    mBLaunch.getMenus().add(fileLaunch);
 		    */
-		    
-	        Button uploadBtn = new Button();
-	        uploadBtn.setText("editieren");
-	        uploadBtn.setOnAction(new EventHandler<ActionEvent>() {            
-	            @Override
-	            public void handle(ActionEvent event) {
-	            	new UiEditor(new Programm(), new Liste());
+		   
 
-	            }
-	        });
-	        
-	        Button searchBtn = new Button();
-	        searchBtn.setText("neue Datei hinzufügen");
-	        searchBtn.setOnAction(new EventHandler<ActionEvent>() {            
-	            @Override
-	            public void handle(ActionEvent event) {
-	            	File f = locateFile(null);
-	            	System.out.println(f);
-	            	if(f.exists() && f.isFile() && f.getName().toLowerCase().endsWith(".csv")) {
-	            		list.add(f);
-	            	} else {
-	            		JOptionPane.showMessageDialog(null, "Ungültige Datei. Bitte erneut versuchen.\nNur Datein im Format .csv sind erlaubt.");
-	            	}
-	            	
-	            }
-	        });	        
-	        
-	        HBox btnBox = addHBox();
-	        btnBox.setStyle("-fx-background-color: #1300ff;");
-	        btnBox.getChildren().add(uploadBtn);
-	        btnBox.getChildren().add(searchBtn);
-	        
-	        
-	        /*
-		    bPLaunch.setBottom(btnBox);	    
-		    bPLaunch.setCenter(l);
-		    //bPLaunch.setTop(mBLaunch);
-		    Scene launch = new Scene(bPLaunch);
-		    window.setScene(launch);
-		    window.setMinHeight(500);
-		    window.setMinWidth(500);
-		    window.show();
-			
-			*/
+	 
 			
 		} catch(Exception e) {
 			e.printStackTrace();

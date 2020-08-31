@@ -74,6 +74,7 @@ public class Programm {
 	
 	public void getFilesFromServer() {
 		try {
+			deliteCurrentFiles(new File("files/"));
 			Socket sock = new Socket(ip, port-1);
 
 			BufferedInputStream bis = new BufferedInputStream(sock.getInputStream());
@@ -82,8 +83,7 @@ public class Programm {
 			int filesCount = dis.readInt();
 			File[] files = new File[filesCount];
 
-			for(int i = 0; i <= filesCount; i++ ) {
-				if(i!=0) {
+			for(int i = 0; i < filesCount; i++ ) {
 				    long fileLength = dis.readLong();
 				    String fileName = dis.readUTF();
 	
@@ -96,7 +96,7 @@ public class Programm {
 	
 				    bos.close();
 				    fos.close();
-				}
+				
 			}
 			dis.close();
 			bis.close();
@@ -107,6 +107,12 @@ public class Programm {
 			e.printStackTrace();
 		}
 	}
+	
+	public void deliteCurrentFiles(File dir) {
+		for(File file: dir.listFiles()) 
+		    if (!file.isDirectory()) 
+		        file.delete();	
+		}
 	
 	public void sendFilesToServer(File[] files) throws IOException {
 		Socket socket = new Socket(ip, port);
