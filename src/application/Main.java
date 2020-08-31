@@ -1,14 +1,8 @@
 package application;
 	
-import java.io.BufferedOutputStream;
-import java.io.DataOutputStream;
+
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.Socket;
-import java.nio.file.Files;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -17,16 +11,13 @@ import javax.swing.JOptionPane;
 
 import javafx.application.Application;
 import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.ListView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 
@@ -54,6 +45,7 @@ public class Main extends Application {
 			for(int i =0;i<files.length;i++) {
 				tableData.add(files[i]);
 			}
+			
 		    /*
 			//MENU
 		    MenuBar mBLaunch = new MenuBar();

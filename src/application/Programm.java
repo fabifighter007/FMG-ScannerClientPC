@@ -53,9 +53,20 @@ public class Programm {
 		    d.writeUTF(file.getName());
 		    d.writeLong(file.length());
 		    Files.copy(file.toPath(), d);
+			d.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} finally {
+			try {
+				socket.close();
+				out.close();
+				in.close();
+				out.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 	
@@ -82,12 +93,10 @@ public class Programm {
 
 			    bos.close();
 			    fos.close();
-			    System.out.println("Saved " + fileName);
 			}
-
 			dis.close();
-			sock.close();
 			bis.close();
+			sock.close();
 			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -96,6 +105,39 @@ public class Programm {
 	}
 	
 	public void sendFilesToServer(File[] files) throws IOException {
+		Socket socket = new Socket(ip, port);
+		BufferedOutputStream bos = new BufferedOutputStream(socket.getOutputStream());
+		DataOutputStream dos = new DataOutputStream(bos);
+
+		dos.writeInt(files.length);
+
+		for(File file : files) {
+		    long length = file.length();
+		    dos.writeLong(length);
+
+		    String name = file.getName();
+		    dos.writeUTF(name);
+
+		    FileInputStream fis = new FileInputStream(file);
+		    BufferedInputStream bis = new BufferedInputStream(fis);
+
+		    int theByte = 0;
+		    while((theByte = bis.read()) != -1) bos.write(theByte);
+
+		    bis.close();
+		    fis.close();
+		}
+		dos.close();
+		bos.close();
+		socket.close();
+		/*
+		socket.close();
+		bos.close();
+		dos.close();
+		*/
+	}
+	
+	public void sendFilesToServer_backup(File[] files) throws IOException {
 		Socket socket = new Socket(ip, port);
 
 		BufferedOutputStream bos = new BufferedOutputStream(socket.getOutputStream());
