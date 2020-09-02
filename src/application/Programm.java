@@ -2,15 +2,23 @@ package application;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
+import java.time.LocalDate;
+import java.util.LinkedList;
 import java.util.List;
 
 import javax.swing.JOptionPane;
@@ -142,6 +150,57 @@ public class Programm {
         		JOptionPane.showMessageDialog(null, "Es wurden " + i + " ungültige Datei nicht hochgeladen.\nNur Datein im Format .csv sind erlaubt!");
 			}
 		}
-		
+	}
+	
+	public void addValidStamp(File f, LocalDate date) {
+		File temp = new File(f.getPath() + ".tmp");
+		if(!temp.exists()) {
+			try {
+				temp.createNewFile();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		try {			
+			LinkedList<String> lines = readFile(f);
+			lines.addFirst("");
+			lines.addFirst("");
+			lines.addFirst("###################################################");
+			lines.addFirst("#valid until: " + date.toString());
+			lines.addFirst("#                   DO NOT EDIT                   #");
+			lines.addFirst("###################################################");
+
+			Files.write(temp.toPath(), lines, StandardCharsets.UTF_8);
+			renameFile(temp, f);
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public static void renameFile(File toBeRenamed, File new_name) throws IOException {
+		Files.move(toBeRenamed.toPath(), new_name.toPath(), StandardCopyOption.ATOMIC_MOVE);
+		}
+	
+	public LinkedList<String> readFile(File f) {
+		LinkedList<String> res = new LinkedList<String>();
+		try (BufferedReader br = new BufferedReader(new FileReader(f))) {
+		    String line;
+		    while ((line = br.readLine()) != null) {
+		    	if(!line.startsWith("#") && !line.trim().equalsIgnoreCase("")) {
+				      res.add(line);
+		    	}
+		    }
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return res;
 	}
 }

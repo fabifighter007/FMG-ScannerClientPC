@@ -2,6 +2,7 @@ package application;
 	
 
 import java.io.File;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -23,13 +24,13 @@ public class Main extends Application {
 			Programm p = new Programm();
 			new UiEditor(p);
 			
-
 			p.getFilesFromServer();
-		
-			
+		    LocalDate inputDate = LocalDate.of(2021,12,4);
+		     
 			File files[] = getFiles(new File("/files"));
 			for(int i =0;i<files.length;i++) {
 				tableData.add(files[i]);
+				p.addValidStamp(tableData.get(i),inputDate);
 			}
 		} catch(Exception e) {
 			e.printStackTrace();
@@ -41,10 +42,10 @@ public class Main extends Application {
 	}
 		
 	  public static File[] getFiles(final File folder) {
-		  File f = new File("files");
+		  ValidFile f = new ValidFile("files");
 		  ArrayList<File> files = new ArrayList<File>(Arrays.asList(f.listFiles()));
 		  
-		  File[] res = new File[files.size()];
+		  ValidFile[] res = new ValidFile[files.size()];
 		  res = files.toArray(res);
 		  
 		  return res;
