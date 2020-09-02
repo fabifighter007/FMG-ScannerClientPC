@@ -4,15 +4,10 @@ package application;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
 
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -32,7 +27,6 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
@@ -40,17 +34,11 @@ import javafx.stage.WindowEvent;
 public class UiEditor {
 
 	private Stage stage;
-	private boolean rand = false;
-	private ImageView randOn, randOff;
+	@SuppressWarnings("unused")
 	private Programm programm;
-	private Liste list;
 	
-	@SuppressWarnings("null")
-	public UiEditor(Programm programm, Liste list) {
+	public UiEditor(Programm programm) {
 		this.programm = programm;
-		this.list = list;
-		randOn = createIcon("random.png");
-		randOff = createIcon("random_no.png");
 		stage = new Stage();
 		stage.setTitle("Scanner Client - PC");
         stage.getIcons().add(new Image("icons/scanner.png"));
@@ -112,14 +100,12 @@ public class UiEditor {
   			if (selectedFile == null) {
   				return;
   			}
-  			list.remove(selectedFile);
   			Main.tableData.remove(selectedFile);
 		});
 		
 		Button syncButton = createButton(createIcon("update.png"));
 		syncButton.setText("empfangen");
 		syncButton.setOnAction(e -> {
-			list.clear();
 			Main.tableData.clear();
 			programm.getFilesFromServer();
 			
@@ -220,19 +206,7 @@ public class UiEditor {
 		TableColumn<File, String> pathtofile = new TableColumn<>("Pfad");
 		pathtofile.setCellValueFactory(
 				new PropertyValueFactory<File, String>("path"));
-		
-		
-		/*
-		TableColumn<File, String> albumColumn = new TableColumn<>("letzte Änderung");
-		albumColumn.setCellValueFactory(
-				new PropertyValueFactory<File, String>("lastModified"));
-		
-		
-		
-		TableColumn<File, String> laengeColumn = new TableColumn<>("Länge");
-		laengeColumn.setCellValueFactory(
-				new PropertyValueFactory<File, String>("laenge"));
-		*/
+
 		
 		tableView.getColumns().add(name);
 		tableView.getColumns().add(pathtofile);
@@ -240,15 +214,11 @@ public class UiEditor {
 		name.prefWidthProperty().bind(tableView.widthProperty().multiply(0.4));
 		pathtofile.prefWidthProperty().bind(tableView.widthProperty().multiply(0.6));
 		
-		//tableView.getColumns().add(albumColumn);
-		//tableView.getColumns().add(laengeColumn);
         tableView.setEditable(false);
-        
 
         /*
          * Doppelklick-Handler setzen
          */
-        
         tableView.setOnMouseClicked(e -> {
         	File p = tableView.getSelectionModel().getSelectedItem();
   			
@@ -256,7 +226,6 @@ public class UiEditor {
   				return;
   			}
   			if (e.getClickCount() == 2) {
-  				programm.setCurrent(p);
   				System.out.println("double klick!");
   				new EditWindow(stage, p);
   			}
@@ -268,9 +237,7 @@ public class UiEditor {
 	
 	private void refreshTableData() {		
 		Main.tableData.clear();
-		//for (File af : list) {
 			for (File af : Main.tableData) {
-
 			Main.tableData.add(af);
 		}
 	}

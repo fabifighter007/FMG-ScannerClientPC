@@ -9,47 +9,33 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.List;
 
-import javax.net.ssl.SSLSocket;
 import javax.swing.JOptionPane;
 
 public class Programm {
 	
 	private static final String ip = "192.168.178.63";
 	private static final int port = 13268;
-	private static String s = "C:/Users/Fabian/Documents/_Dokumente/_Studium/FMG/test.txt";
-	private static File file = new File("C:/Users/Fabian/Documents/_Dokumente/_Studium/FMG/test.txt");
-	private File p;
-	private File p2;
+
 	public Programm() {
-		
+		System.out.println("Using " + ip + ":" + port);
 	}
 	
 	public void sendFile(String name, String path) {
 		
 	}
-
-	public void setCurrent(File p2) {
-		// TODO Auto-generated method stub
-		this.p = p2;
-	}
 	
 	public void sendFileToServer(File file) {
 		Socket socket = null;
-	 	@SuppressWarnings("unused")
 		InputStream in = null;
 		BufferedOutputStream out = null;
 		try {
 			socket = new Socket(ip, port);
 			out = new BufferedOutputStream(socket.getOutputStream());
 		} catch (IOException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 		
@@ -59,7 +45,6 @@ public class Programm {
 		    Files.copy(file.toPath(), d);
 			d.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} finally {
 			try {
@@ -68,7 +53,6 @@ public class Programm {
 				in.close();
 				out.close();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -142,11 +126,6 @@ public class Programm {
 		dos.close();
 		bos.close();
 		socket.close();
-		/*
-		socket.close();
-		bos.close();
-		dos.close();
-		*/
 	}
 	
 	public void addFiles(List<File> files) {
