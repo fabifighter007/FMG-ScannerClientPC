@@ -14,8 +14,10 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
 import javax.net.ssl.SSLSocket;
+import javax.swing.JOptionPane;
 
 public class Programm {
 	
@@ -147,32 +149,20 @@ public class Programm {
 		*/
 	}
 	
-	public void sendFilesToServer_backup(File[] files) throws IOException {
-		Socket socket = new Socket(ip, port);
-
-		BufferedOutputStream bos = new BufferedOutputStream(socket.getOutputStream());
-		DataOutputStream dos = new DataOutputStream(bos);
-
-		dos.writeInt(files.length);
-
-		for(File file : files) {
-		    long length = file.length();
-		    dos.writeLong(length);
-
-		    String name = file.getName();
-		    dos.writeUTF(name);
-
-		    FileInputStream fis = new FileInputStream(file);
-		    BufferedInputStream bis = new BufferedInputStream(fis);
-
-		    int theByte = 0;
-		    while((theByte = bis.read()) != -1) bos.write(theByte);
-
-		    bis.close();
-		    fis.close();
+	public void addFiles(List<File> files) {
+		if (files != null && !files.isEmpty()) {
+			int i=0;
+			for(File f : files) {
+				if(f.exists() && f.getName().trim().toLowerCase().endsWith(".csv") || f.getName().trim().toLowerCase().endsWith(".txt")) {
+    	            Main.tableData.add(f);
+				} else {
+					i++;
+				}
+			}
+			if(i>0) {
+        		JOptionPane.showMessageDialog(null, "Es wurden " + i + " ungültige Datei nicht hochgeladen.\nNur Datein im Format .csv sind erlaubt!");
+			}
 		}
-		socket.close();
-		bos.close();
-		dos.close();
+		
 	}
 }

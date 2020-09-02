@@ -13,20 +13,26 @@ import javax.swing.JOptionPane;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContentDisplay;
+import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.DragEvent;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.TransferMode;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
@@ -50,6 +56,38 @@ public class UiEditor {
         stage.getIcons().add(new Image("icons/scanner.png"));
         
 		BorderPane mainPane = new BorderPane();
+		
+		mainPane.setOnDragOver(new EventHandler<DragEvent>() {
+            @Override
+            public void handle(DragEvent event) {
+                if (event.getGestureSource() != mainPane
+                        && event.getDragboard().hasFiles()) {
+                    /* allow for both copying and moving, whatever user chooses */
+                    event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
+                }
+                event.consume();
+            }
+        });
+		
+		mainPane.setOnDragDropped(new EventHandler<DragEvent>() {
+            @Override
+            public void handle(DragEvent event) {
+                Dragboard db = event.getDragboard();
+                boolean success = false;
+                if (db.hasFiles()) {
+                	System.out.println("Angekommen");
+                	programm.addFiles(db.getFiles());
+
+                    success = true;
+                }
+                /* let the source know whether the string was successfully 
+                 * transferred and used */
+                event.setDropCompleted(success);
+
+                event.consume();
+            }
+        });
+		
 		TableView<File> tableView = createTable();
 		FlowPane bottom = new FlowPane();
 
@@ -59,27 +97,11 @@ public class UiEditor {
 			 FileChooser fileChooser = new FileChooser();
 			 fileChooser.setTitle(stage.getTitle().replace("PC", "").replace("-", "").trim() + " - Datei auswählen");
 			 fileChooser.getExtensionFilters().addAll(
-			         new ExtensionFilter("CSV Files", "*.csv"),
-			         new ExtensionFilter("Text Files", "*.txt", "*.csv"),
-			         new ExtensionFilter("All Files", "*.*"));
-			 		//File selectedFile = fileChooser.showOpenDialog(stage);
+			         new ExtensionFilter("CSV Datein", "*.csv"),
+			         new ExtensionFilter("Text Datein", "*.txt", "*.csv"),
+			         new ExtensionFilter("Alle Datein", "*.*"));
 			 List<File> selectedFiles = fileChooser.showOpenMultipleDialog(stage);
-			
-				if (selectedFiles != null && !selectedFiles.isEmpty()) {
-					int i=0;
-					for(File f : selectedFiles) {
-						if(f.exists() && f.getName().trim().toLowerCase().endsWith(".csv") || f.getName().trim().toLowerCase().endsWith(".txt")) {
-							list.add(f);
-		    	            Main.tableData.add(f);
-						} else {
-							i++;
-						}
-					}
-					if(i!=0) {
-	            		JOptionPane.showMessageDialog(null, "Es wurden " + i + " ungültige Datei nicht hochgeladen.\nNur Datein im Format .csv sind erlaubt!");
-					}
-				}
-			
+			 programm.addFiles(selectedFiles);
 
 		});
 		
@@ -133,7 +155,9 @@ public class UiEditor {
 		mainPane.setBottom(bottom);
 		
 		stage.setScene(new Scene(mainPane));
-		stage.setWidth(512.);
+		//stage.setWidth(512.);
+		stage.setWidth(1024);
+		stage.setHeight(512 + 256);
 		stage.getScene().getWindow().addEventFilter(WindowEvent.WINDOW_CLOSE_REQUEST, e -> {
 
 		});		
@@ -212,6 +236,10 @@ public class UiEditor {
 		
 		tableView.getColumns().add(name);
 		tableView.getColumns().add(pathtofile);
+		
+		name.prefWidthProperty().bind(tableView.widthProperty().multiply(0.4));
+		pathtofile.prefWidthProperty().bind(tableView.widthProperty().multiply(0.6));
+		
 		//tableView.getColumns().add(albumColumn);
 		//tableView.getColumns().add(laengeColumn);
         tableView.setEditable(false);
@@ -230,9 +258,11 @@ public class UiEditor {
   			if (e.getClickCount() == 2) {
   				programm.setCurrent(p);
   				System.out.println("double klick!");
+  				new EditWindow(stage, p);
   			}
         });
-   
+        
+        tableView.setPlaceholder(new Label("Keine Daten auf dem Server vorhanden."));   
         return tableView;
 	}
 	
