@@ -6,7 +6,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 
-
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -36,6 +37,7 @@ public class UiEditor {
 	private Stage stage;
 	@SuppressWarnings("unused")
 	private Programm programm;
+	private TableView<ValidFile> tableView;
 	
 	public UiEditor(Programm programm) {
 		this.programm = programm;
@@ -44,6 +46,18 @@ public class UiEditor {
         stage.getIcons().add(new Image("icons/scanner.png"));
         
 		BorderPane mainPane = new BorderPane();
+		
+		stage.focusedProperty().addListener(new ChangeListener<Boolean>() {
+		  @Override
+		  public void changed(ObservableValue<? extends Boolean> ov, Boolean onHidden, Boolean onShown) {
+		    tableView.refresh();	// updates the table after getting / losing focus
+		    for(ValidFile f : Main.tableData) {
+		    	if(f.wasChanged()) {
+		    		programm.addValidStamp(f);
+		    		f.setChanged(false);
+		    	}
+		    }
+		  }});		
 		
 		mainPane.setOnDragOver(new EventHandler<DragEvent>() {
             @Override
@@ -63,7 +77,6 @@ public class UiEditor {
                 Dragboard db = event.getDragboard();
                 boolean success = false;
                 if (db.hasFiles()) {
-                	System.out.println("Angekommen");
                 	programm.addFiles(db.getFiles());
 
                     success = true;
@@ -76,7 +89,7 @@ public class UiEditor {
             }
         });
 		
-		TableView<File> tableView = createTable();
+		tableView = createTable();
 		FlowPane bottom = new FlowPane();
 
 		// bottom Pane
@@ -90,7 +103,9 @@ public class UiEditor {
 			         new ExtensionFilter("Alle Datein", "*.*"));
 			 List<File> selectedFiles = fileChooser.showOpenMultipleDialog(stage);
 			 programm.addFiles(selectedFiles);
-
+			 
+			//ValidFile i = new ValidFile(fileChooser.showOpenDialog(stage));
+			//programm.addFiles(i);
 		});
 		
 		Button delButton = createButton(createIcon("remove.png"));
@@ -109,16 +124,16 @@ public class UiEditor {
 			Main.tableData.clear();
 			programm.getFilesFromServer();
 			
-			File files[] = Main.getFiles(new File("/files"));
+			File[] files = Main.getFiles(new File("/files"));
 			for(int i =0;i<files.length;i++) {
-				Main.tableData.add(files[i]);
+				Main.tableData.add(programm.addValidToFile(files[i]));
 			}
 		});
 		
 		Button updateButton = createButton(createIcon("send.png"));
 		updateButton.setText("Datein an server senden");
 		updateButton.setOnAction(e -> {
-			File[] files =  new File[Main.tableData.size()]; // for testing...
+			File[] files =  new File[Main.tableData.size()]; 
 			files = Main.tableData.toArray(files);
 
 			try {
@@ -141,11 +156,9 @@ public class UiEditor {
 		mainPane.setBottom(bottom);
 		
 		stage.setScene(new Scene(mainPane));
-		//stage.setWidth(512.);
 		stage.setWidth(1024);
 		stage.setHeight(512 + 256);
 		stage.getScene().getWindow().addEventFilter(WindowEvent.WINDOW_CLOSE_REQUEST, e -> {
-
 		});		
 		stage.show();
 	}
@@ -173,12 +186,6 @@ public class UiEditor {
 		return button;
 	}
 	
-	public void show() {
-		refreshTableData();
-		
-		stage.show();
-	}
-
 	public void hide() {
 		stage.hide();
 	}
@@ -187,32 +194,40 @@ public class UiEditor {
 		stage.close();
 	}
 	
-	private TableView<File> createTable() {
+	private TableView<ValidFile> createTable() {
+		
 		/*
 		 * Daten für Tabelle erzeugen
 		 */
 		Main.tableData = FXCollections.observableArrayList();
-		refreshTableData();
+		//refreshTableData(this);
 		/*
 		 * TableView erzeugen und Daten setzen
 		 */
-		TableView<File> tableView = new TableView<>(Main.tableData);
+		TableView<ValidFile> tableView = new TableView<>(Main.tableData);
 		/*
 		 * Spalten definieren und der tableView bekannt machen
 		 */
-        TableColumn<File, String> name = new TableColumn<>("Dateiname");
+		
+        TableColumn<ValidFile, String> name = new TableColumn<>("Dateiname");
         name.setCellValueFactory(
-				new PropertyValueFactory<File, String>("name"));
-		TableColumn<File, String> pathtofile = new TableColumn<>("Pfad");
+				new PropertyValueFactory<ValidFile, String>("name"));
+        
+        TableColumn<ValidFile, String> pathtofile = new TableColumn<>("Pfad");
 		pathtofile.setCellValueFactory(
-				new PropertyValueFactory<File, String>("path"));
+				new PropertyValueFactory<ValidFile, String>("path"));
+		
+		TableColumn<ValidFile, String> valid = new TableColumn<>("Gültig bis");
+		valid.setCellValueFactory(
+				new PropertyValueFactory<ValidFile, String>("Date"));
 
 		
 		tableView.getColumns().add(name);
 		tableView.getColumns().add(pathtofile);
+		tableView.getColumns().add(valid);
 		
-		name.prefWidthProperty().bind(tableView.widthProperty().multiply(0.4));
-		pathtofile.prefWidthProperty().bind(tableView.widthProperty().multiply(0.6));
+		/*name.prefWidthProperty().bind(tableView.widthProperty().multiply(0.4));
+		pathtofile.prefWidthProperty().bind(tableView.widthProperty().multiply(0.6));*/
 		
         tableView.setEditable(false);
 
@@ -220,7 +235,7 @@ public class UiEditor {
          * Doppelklick-Handler setzen
          */
         tableView.setOnMouseClicked(e -> {
-        	File p = tableView.getSelectionModel().getSelectedItem();
+        	ValidFile p = tableView.getSelectionModel().getSelectedItem();
   			
   			if (p == null) {
   				return;
@@ -233,12 +248,5 @@ public class UiEditor {
         
         tableView.setPlaceholder(new Label("Keine Daten auf dem Server vorhanden."));   
         return tableView;
-	}
-	
-	private void refreshTableData() {		
-		Main.tableData.clear();
-			for (File af : Main.tableData) {
-			Main.tableData.add(af);
-		}
 	}
 }

@@ -2,7 +2,6 @@ package application;
 	
 
 import java.io.File;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -12,10 +11,12 @@ import javafx.stage.Stage;
 
 
 public class Main extends Application {
+	//https://stackoverflow.com/questions/55874952/javafx-propertyvaluefactory-is-not-able-to-retrieve-property
 	@SuppressWarnings("unused")
-	private List<File> datein = new ArrayList<>();
+	private List<ValidFile> datein = new ArrayList<>();
 	
-	public static volatile ObservableList<File> tableData;
+	public static volatile ObservableList<ValidFile> tableData;
+	public static final int DEFAULT_VALID_TIME = 7; // Gültigkeit einer Datei
 
 	
 	@Override
@@ -25,12 +26,11 @@ public class Main extends Application {
 			new UiEditor(p);
 			
 			p.getFilesFromServer();
-		    LocalDate inputDate = LocalDate.of(2021,12,4);
-		     
-			File files[] = getFiles(new File("/files"));
+		    
+		    File files[] = getFiles(new File("/files"));
 			for(int i =0;i<files.length;i++) {
-				tableData.add(files[i]);
-				p.addValidStamp(tableData.get(i),inputDate);
+				//tableData.add(new ValidFile(files[i]));
+				tableData.add(p.addValidToFile(files[i]));
 			}
 		} catch(Exception e) {
 			e.printStackTrace();
@@ -42,10 +42,10 @@ public class Main extends Application {
 	}
 		
 	  public static File[] getFiles(final File folder) {
-		  ValidFile f = new ValidFile("files");
-		  ArrayList<File> files = new ArrayList<File>(Arrays.asList(f.listFiles()));
+		  File f = new File("files");
+		  ArrayList<File> files = new ArrayList<>(Arrays.asList(f.listFiles()));
 		  
-		  ValidFile[] res = new ValidFile[files.size()];
+		  File[] res = new File[files.size()];
 		  res = files.toArray(res);
 		  
 		  return res;

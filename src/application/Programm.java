@@ -12,6 +12,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
@@ -31,11 +32,7 @@ public class Programm {
 	public Programm() {
 		System.out.println("Using " + ip + ":" + port);
 	}
-	
-	public void sendFile(String name, String path) {
-		
-	}
-	
+
 	public void sendFileToServer(File file) {
 		Socket socket = null;
 		InputStream in = null;
@@ -75,13 +72,13 @@ public class Programm {
 			DataInputStream dis = new DataInputStream(bis);
 
 			int filesCount = dis.readInt();
-			File[] files = new File[filesCount];
+			ValidFile[] files = new ValidFile[filesCount];
 
 			for(int i = 0; i < filesCount; i++ ) {
 				    long fileLength = dis.readLong();
 				    String fileName = dis.readUTF();
 	
-				    files[i] = new File("files/" + fileName);
+				    files[i] = new ValidFile("files/" + fileName);
 	
 				    FileOutputStream fos = new FileOutputStream(files[i]);
 				    BufferedOutputStream bos = new BufferedOutputStream(fos);
@@ -90,7 +87,7 @@ public class Programm {
 	
 				    bos.close();
 				    fos.close();
-				
+				    files[i] = addValidToFile(files[i]);
 			}
 			dis.close();
 			bis.close();
@@ -136,23 +133,37 @@ public class Programm {
 		socket.close();
 	}
 	
-	public void addFiles(List<File> files) {
-		if (files != null && !files.isEmpty()) {
+	public void addFiles(List<File> list) {
+		if (list != null && !list.isEmpty()) {
 			int i=0;
-			for(File f : files) {
+			for(File f : list) {
 				if(f.exists() && f.getName().trim().toLowerCase().endsWith(".csv") || f.getName().trim().toLowerCase().endsWith(".txt")) {
-    	            Main.tableData.add(f);
+					ValidFile res = new ValidFile(f);
+					res.setValid(LocalDate.now().plusDays(Main.DEFAULT_VALID_TIME));
+					addValidStamp(res);
+    	            Main.tableData.add(res);
 				} else {
 					i++;
 				}
 			}
 			if(i>0) {
-        		JOptionPane.showMessageDialog(null, "Es wurden " + i + " ungültige Datei nicht hochgeladen.\nNur Datein im Format .csv sind erlaubt!");
+        		JOptionPane.showMessageDialog(null, "Es wurden " + i + " ungï¿½ltige Datei nicht hochgeladen.\nNur Datein im Format .csv sind erlaubt!");
 			}
 		}
 	}
 	
-	public void addValidStamp(File f, LocalDate date) {
+	public void addFiles(ValidFile f) {
+			int i=0;
+				if(f.exists() && f.getName().trim().toLowerCase().endsWith(".csv") || f.getName().trim().toLowerCase().endsWith(".txt")) {
+					ValidFile res = new ValidFile(f);
+					res.setValid(LocalDate.now().plusDays(Main.DEFAULT_VALID_TIME));
+					addValidStamp(res);
+    	            Main.tableData.add(res);				} else {
+	        		JOptionPane.showMessageDialog(null, "Es wurden " + i + " ungï¿½ltige Datei nicht hochgeladen.\nNur Datein im Format .csv sind erlaubt!");
+				}
+	}
+	
+	public void addValidStamp(ValidFile f, LocalDate date) {
 		File temp = new File(f.getPath() + ".tmp");
 		if(!temp.exists()) {
 			try {
@@ -185,13 +196,70 @@ public class Programm {
 		}
 	}
 	
+	public void addValidStamp(ValidFile f) {
+		if(f.getDate()!=null) {
+			File temp = new File(f.getPath() + ".tmp");
+			if(!temp.exists()) {
+				try {
+					temp.createNewFile();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			try {			
+				LinkedList<String> lines = readFile(f);
+				lines.addFirst("");
+				lines.addFirst("");
+				lines.addFirst("###################################################");
+				lines.addFirst("#valid until: " + f.getDate());
+				lines.addFirst("#                   DO NOT EDIT                   #");
+				lines.addFirst("###################################################");
+	
+				Files.write(temp.toPath(), lines, StandardCharsets.UTF_8);
+				renameFile(temp, f);
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (UnsupportedEncodingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	public ValidFile addValidToFile(File f) {
+		ValidFile res = new ValidFile(f);
+		  try(BufferedReader br = new BufferedReader(new FileReader(f))) {
+			    for(String line; (line = br.readLine()) != null; ) {
+			        if(line.startsWith("#") && line.contains("valid until")) {
+			        	line = line.replace("#valid until: ", "");
+			        	String[] test = line.split("-");
+			        	LocalDate inputDate = LocalDate.of(Integer.parseInt(test[0]), Integer.parseInt(test[1]), Integer.parseInt(test[2]));
+			        	res.setValid(inputDate);
+			        	System.out.println(inputDate.toString());
+
+			        	break;
+			        } else {
+			        	
+			        }
+			    }
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		  return res;
+	}
+	
 	public static void renameFile(File toBeRenamed, File new_name) throws IOException {
 		Files.move(toBeRenamed.toPath(), new_name.toPath(), StandardCopyOption.ATOMIC_MOVE);
 		}
 	
 	public LinkedList<String> readFile(File f) {
 		LinkedList<String> res = new LinkedList<String>();
-		try (BufferedReader br = new BufferedReader(new FileReader(f))) {
+		try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(f), "UTF-8"));) {
 		    String line;
 		    while ((line = br.readLine()) != null) {
 		    	if(!line.startsWith("#") && !line.trim().equalsIgnoreCase("")) {
