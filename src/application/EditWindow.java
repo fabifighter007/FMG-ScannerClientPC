@@ -1,10 +1,12 @@
 package application;
 
+import java.io.File;
 import java.net.URL;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.zip.DataFormatException;
+
+import javax.swing.JOptionPane;
 
 import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
@@ -50,7 +52,6 @@ public class EditWindow extends Application {
 		 datePicker.setOnAction(new EventHandler() {
 		     public void handle(Event t) {
 		         LocalDate date = datePicker.getValue();
-		         System.err.println("Selected date: " + date);
 		     }
 		 });	
 		 
@@ -79,10 +80,22 @@ public class EditWindow extends Application {
 		
 		Button okButton = createButton(createIcon("checktickgreenx64.png"));
 		okButton.setOnAction(e -> {
-			//Main.tableData.remove(f);
+			if(!f.getName().equals(inputName.getText())) {
+				String text = inputName.getText();
+				if(text.endsWith(".csv") || text.endsWith(".txt")) {
+					
+				} else {
+					text += ".txt";
+				}
+				Main.tableData.remove(f);
+				
+				Programm.renameFile(f, new File(f.getParent() + File.separatorChar + text));
+				f.delete();
+				Main.tableData.add(Programm.addValidToFile(Main.getFile(null, text)));
+			}
 			f.setValid(datePicker.getValue());
 			f.setChanged(true);
-			//Main.tableData.add(f);
+			stage.close();
 		});
 
 		FlowPane bottom = new FlowPane();

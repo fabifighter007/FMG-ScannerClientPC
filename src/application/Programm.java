@@ -26,11 +26,10 @@ import javax.swing.JOptionPane;
 
 public class Programm {
 	
-	private static final String ip = "192.168.178.63";
-	private static final int port = 13268;
+
 
 	public Programm() {
-		System.out.println("Using " + ip + ":" + port);
+		System.out.println("Using " + Main.IP + ":" + Main.PORT);
 	}
 
 	public void sendFileToServer(File file) {
@@ -38,7 +37,7 @@ public class Programm {
 		InputStream in = null;
 		BufferedOutputStream out = null;
 		try {
-			socket = new Socket(ip, port);
+			socket = new Socket(Main.IP, Main.PORT);
 			out = new BufferedOutputStream(socket.getOutputStream());
 		} catch (IOException e1) {
 			e1.printStackTrace();
@@ -63,10 +62,11 @@ public class Programm {
 		}
 	}
 	
-	public void getFilesFromServer() {
+	public boolean getFilesFromServer() {
+		boolean res = false;
 		try {
 			deliteCurrentFiles(new File("files/"));
-			Socket sock = new Socket(ip, port-1);
+			Socket sock = new Socket(Main.IP, Main.PORT-1);
 
 			BufferedInputStream bis = new BufferedInputStream(sock.getInputStream());
 			DataInputStream dis = new DataInputStream(bis);
@@ -92,11 +92,12 @@ public class Programm {
 			dis.close();
 			bis.close();
 			sock.close();
-			
+			res = true;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		return res;
 	}
 	
 	public void deliteCurrentFiles(File dir) {
@@ -106,7 +107,7 @@ public class Programm {
 		}
 	
 	public void sendFilesToServer(File[] files) throws IOException {
-		Socket socket = new Socket(ip, port);
+		Socket socket = new Socket(Main.IP, Main.PORT);
 		BufferedOutputStream bos = new BufferedOutputStream(socket.getOutputStream());
 		DataOutputStream dos = new DataOutputStream(bos);
 
@@ -231,7 +232,7 @@ public class Programm {
 		}
 	}
 	
-	public ValidFile addValidToFile(File f) {
+	public static ValidFile addValidToFile(File f) {
 		ValidFile res = new ValidFile(f);
 		  try(BufferedReader br = new BufferedReader(new FileReader(f))) {
 			    for(String line; (line = br.readLine()) != null; ) {
@@ -240,8 +241,6 @@ public class Programm {
 			        	String[] test = line.split("-");
 			        	LocalDate inputDate = LocalDate.of(Integer.parseInt(test[0]), Integer.parseInt(test[1]), Integer.parseInt(test[2]));
 			        	res.setValid(inputDate);
-			        	System.out.println(inputDate.toString());
-
 			        	break;
 			        } else {
 			        	
@@ -253,8 +252,13 @@ public class Programm {
 		  return res;
 	}
 	
-	public static void renameFile(File toBeRenamed, File new_name) throws IOException {
-		Files.move(toBeRenamed.toPath(), new_name.toPath(), StandardCopyOption.ATOMIC_MOVE);
+	public static void renameFile(File toBeRenamed, File new_name) {
+		try {
+			Files.move(toBeRenamed.toPath(), new_name.toPath(), StandardCopyOption.ATOMIC_MOVE);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			}
 		}
 	
 	public LinkedList<String> readFile(File f) {

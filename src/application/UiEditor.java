@@ -219,21 +219,24 @@ public class UiEditor {
 		
 		TableColumn<ValidFile, String> valid = new TableColumn<>("Gültig bis");
 		valid.setCellValueFactory(
-				new PropertyValueFactory<ValidFile, String>("Date"));
+				new PropertyValueFactory<ValidFile, String>("FormatedDate"));
 
 		
 		tableView.getColumns().add(name);
-		tableView.getColumns().add(pathtofile);
 		tableView.getColumns().add(valid);
+		tableView.getColumns().add(pathtofile);
+
 		
-		/*name.prefWidthProperty().bind(tableView.widthProperty().multiply(0.4));
-		pathtofile.prefWidthProperty().bind(tableView.widthProperty().multiply(0.6));*/
+		name.prefWidthProperty().bind(tableView.widthProperty().multiply(0.2));
+		pathtofile.prefWidthProperty().bind(tableView.widthProperty().multiply(0.6));
+		valid.prefWidthProperty().bind(tableView.widthProperty().multiply(0.2));
 		
-        tableView.setEditable(false);
+        tableView.setEditable(true);
 
         /*
          * Doppelklick-Handler setzen
          */
+        
         tableView.setOnMouseClicked(e -> {
         	ValidFile p = tableView.getSelectionModel().getSelectedItem();
   			
@@ -241,12 +244,12 @@ public class UiEditor {
   				return;
   			}
   			if (e.getClickCount() == 2) {
-  				System.out.println("double klick!");
   				new EditWindow(stage, p);
   			}
         });
+
         
-        tableView.setPlaceholder(new Label("Keine Daten auf dem Server vorhanden."));   
+        tableView.setPlaceholder(new Label("Keine Daten vorhanden."));   
         return tableView;
 	}
 }

@@ -2,6 +2,7 @@ package application;
 
 import java.io.File;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -52,7 +53,13 @@ public class ValidFile extends java.io.File {
 		if(date==null) {
 			return "---";
 		}
-		return date.toString();
+			return date.toString();
+	}
+	
+	public String getFormatedDate() {
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd. LLLL yyyy");
+		String formattedString = date.format(formatter);
+		return formattedString;
 	}
 	
 	public String getIsValid() {

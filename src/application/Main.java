@@ -5,6 +5,10 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import javax.swing.JDialog;
+import javax.swing.JOptionPane;
+
 import javafx.application.Application;
 import javafx.collections.ObservableList;
 import javafx.stage.Stage;
@@ -17,6 +21,8 @@ public class Main extends Application {
 	
 	public static volatile ObservableList<ValidFile> tableData;
 	public static final int DEFAULT_VALID_TIME = 7; // Gültigkeit einer Datei
+	public static final String IP = "192.168.178.63";
+	public static final int PORT = 13268;
 
 	
 	@Override
@@ -25,13 +31,21 @@ public class Main extends Application {
 			Programm p = new Programm();
 			new UiEditor(p);
 			
-			p.getFilesFromServer();
-		    
-		    File files[] = getFiles(new File("/files"));
-			for(int i =0;i<files.length;i++) {
-				//tableData.add(new ValidFile(files[i]));
-				tableData.add(p.addValidToFile(files[i]));
+			if(p.getFilesFromServer()) {
+			    File files[] = getFiles(new File("/files"));
+				for(int i =0;i<files.length;i++) {
+					//tableData.add(new ValidFile(files[i]));
+					tableData.add(p.addValidToFile(files[i]));
+				}
+			} else {
+				JOptionPane optionPane = new JOptionPane("Es konnte keine Verbindung hergestellt werden.\n\n " + IP + ":" + PORT, JOptionPane.ERROR_MESSAGE);    
+				JDialog dialog = optionPane.createDialog("Fehler");
+				dialog.setAlwaysOnTop(true);
+				dialog.setVisible(true);
+				System.exit(1);
 			}
+		    
+
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
@@ -47,6 +61,14 @@ public class Main extends Application {
 		  
 		  File[] res = new File[files.size()];
 		  res = files.toArray(res);
+		  
+		  return res;
+	  }
+	  
+	  public static File getFile(final File folder, String name) {
+		  File f = new File("files");
+		  
+		  File res = new File(f + File.separator + name);
 		  
 		  return res;
 	  }
