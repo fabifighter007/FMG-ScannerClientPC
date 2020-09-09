@@ -21,12 +21,15 @@ public class Main extends Application {
 	
 	public static volatile ObservableList<ValidFile> tableData;
 	public static final int DEFAULT_VALID_TIME = 7; // Gültigkeit einer Datei
-	public static final String IP = "192.168.178.63";
+	//public static final String IP = "192.168.178.63";
+	public static final String IP = "127.0.0.1";
 	public static final int PORT = 13268;
 
 	
 	@Override
 	public void start(Stage primaryStage) {
+		System.setProperty("javax.net.ssl.trustStore", "testneu.store");
+		System.setProperty("javafx.net.ssl.keyStorePassword", "123456");
 		try {
 			Programm p = new Programm();
 			new UiEditor(p);
@@ -35,7 +38,7 @@ public class Main extends Application {
 			    File files[] = getFiles(new File("/files"));
 				for(int i =0;i<files.length;i++) {
 					//tableData.add(new ValidFile(files[i]));
-					tableData.add(p.addValidToFile(files[i]));
+					tableData.add(Programm.addValidToFile(files[i]));
 				}
 			} else {
 				JOptionPane optionPane = new JOptionPane("Es konnte keine Verbindung hergestellt werden.\n\n " + IP + ":" + PORT, JOptionPane.ERROR_MESSAGE);    

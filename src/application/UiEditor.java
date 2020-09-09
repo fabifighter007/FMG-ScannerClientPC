@@ -126,7 +126,7 @@ public class UiEditor {
 			
 			File[] files = Main.getFiles(new File("/files"));
 			for(int i =0;i<files.length;i++) {
-				Main.tableData.add(programm.addValidToFile(files[i]));
+				Main.tableData.add(Programm.addValidToFile(files[i]));
 			}
 		});
 		

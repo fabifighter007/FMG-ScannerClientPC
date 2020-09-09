@@ -67,10 +67,9 @@ public class Programm {
 		try {
 			deliteCurrentFiles(new File("files/"));
 			Socket sock = new Socket(Main.IP, Main.PORT-1);
-
+  
 			BufferedInputStream bis = new BufferedInputStream(sock.getInputStream());
 			DataInputStream dis = new DataInputStream(bis);
-
 			int filesCount = dis.readInt();
 			ValidFile[] files = new ValidFile[filesCount];
 

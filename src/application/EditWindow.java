@@ -3,10 +3,8 @@ package application;
 import java.io.File;
 import java.net.URL;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-
-import javax.swing.JOptionPane;
+import java.util.ArrayList;
 
 import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
@@ -19,6 +17,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.DatePicker;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -41,7 +40,7 @@ public class EditWindow extends Application {
 		}
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings({ "rawtypes", "unchecked", "unused" })
 	public void start(Stage stage, Stage owner, ValidFile f) throws Exception {
 		 this.file = f;
 		 TextField inputName = new TextField();
@@ -51,7 +50,7 @@ public class EditWindow extends Application {
 		 datePicker.setValue(f.getValid());
 		 datePicker.setOnAction(new EventHandler() {
 		     public void handle(Event t) {
-		         LocalDate date = datePicker.getValue();
+				LocalDate date = datePicker.getValue();
 		     }
 		 });	
 		 
@@ -68,15 +67,35 @@ public class EditWindow extends Application {
 		        }
 		    });
 		 
-		TimeSpinner spinner = new TimeSpinner();
+		 Label l = new Label("Gültig bis einschließlich: ");
+		/*
+		 TimeSpinner spinner = new TimeSpinner();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("hh:mm:ss a");
         spinner.valueProperty().addListener((obs, oldTime, newTime) -> 
             System.out.println(formatter.format(newTime)));
+        */
+		ArrayList<String> values = new ArrayList<>();
+        values.add("Datei: " + f.getName());
+        values.add("Speicherort: " + f.getAbsolutePath());
+        values.add("Gültig bis einschließlich: " + f.getFormatedDate());
+        
+        Label t = new Label();
+        t.setStyle("-fx-border-color: grey; -fx-border-insets: 0 0 0 0; -fx-padding: 5px;");
+        boolean init=true;
+        for(String s : values) {
+        	if(init) {
+        		
+        	} else {
+            	t.setText(s);
+            	init=false;
+        	}
+        	t.setText(t.getText() + "\n" + s);
+        }
         
 		VBox vbox = new VBox();
 		vbox.setSpacing(50);
 		vbox.setPadding(new Insets(10));   //10 px "buffer" around button
-		vbox.getChildren().add(inputName);
+		vbox.getChildren().addAll(inputName, t);
 		
 		Button okButton = createButton(createIcon("checktickgreenx64.png"));
 		okButton.setOnAction(e -> {
@@ -99,10 +118,9 @@ public class EditWindow extends Application {
 		});
 
 		FlowPane bottom = new FlowPane();
-		bottom.getChildren().addAll(datePicker, spinner, okButton);
+		bottom.getChildren().addAll(l, datePicker, okButton);
 		bottom.setAlignment(Pos.CENTER);
 		FlowPane.setMargin(datePicker, new Insets(8, 5, 8, 5));
-		FlowPane.setMargin(spinner, new Insets(8, 5, 8, 5));
 		FlowPane.setMargin(okButton, new Insets(8, 5, 8, 5));
 		bottom.setVgap(10);
 		
