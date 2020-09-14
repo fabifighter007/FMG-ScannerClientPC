@@ -229,7 +229,7 @@ public class UiEditor {
 		valid.setCellValueFactory(
 				new PropertyValueFactory<ValidFile, String>("FormatedDate"));
 
-		valid.setComparator(new ValidComperator());
+		valid.setComparator(new DateComperator());
 		tableView.getColumns().add(name);
 		tableView.getColumns().add(valid);
 		tableView.getColumns().add(pathtofile);
