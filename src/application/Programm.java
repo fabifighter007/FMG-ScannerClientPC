@@ -159,7 +159,7 @@ public class Programm {
 					res.setValid(LocalDate.now().plusDays(Main.DEFAULT_VALID_TIME));
 					addValidStamp(res);
     	            Main.tableData.add(res);				} else {
-	        		JOptionPane.showMessageDialog(null, "Es wurden " + i + " ungï¿½ltige Datei nicht hochgeladen.\nNur Datein im Format .csv sind erlaubt!");
+	        		JOptionPane.showMessageDialog(null, "Es wurden " + i + " ungültige Datei nicht hochgeladen.\nNur Datein im Format .csv sind erlaubt!");
 				}
 	}
 	

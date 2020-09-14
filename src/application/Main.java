@@ -47,9 +47,7 @@ public class Main extends Application {
 				dialog.setVisible(true);
 				System.exit(1);
 			}
-		    
-
-		} catch(Exception e) {
+			} catch(Exception e) {
 			e.printStackTrace();
 		}
 	}

@@ -18,6 +18,7 @@ import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.Tooltip;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -28,6 +29,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
+import javafx.util.Duration;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
@@ -93,7 +95,7 @@ public class UiEditor {
 		FlowPane bottom = new FlowPane();
 
 		// bottom Pane
-		Button addButton = createButton(createIcon("add.png"));
+		Button addButton = createButton(createIcon("add.png"), "Datei hinzufügen");
 		addButton.setOnAction(e -> {
 			 FileChooser fileChooser = new FileChooser();
 			 fileChooser.setTitle(stage.getTitle().replace("PC", "").replace("-", "").trim() + " - Datei auswählen");
@@ -108,7 +110,7 @@ public class UiEditor {
 			//programm.addFiles(i);
 		});
 		
-		Button delButton = createButton(createIcon("remove.png"));
+		Button delButton = createButton(createIcon("remove.png"), "Datei entfernen");
 		delButton.setOnAction(e -> {
 			File selectedFile = tableView.getSelectionModel().getSelectedItem();
   			
@@ -118,7 +120,7 @@ public class UiEditor {
   			Main.tableData.remove(selectedFile);
 		});
 		
-		Button syncButton = createButton(createIcon("update.png"));
+		Button syncButton = createButton(createIcon("update.png"), "Lokale Datein aktualisieren");
 		syncButton.setText("empfangen");
 		syncButton.setOnAction(e -> {
 			Main.tableData.clear();
@@ -130,7 +132,7 @@ public class UiEditor {
 			}
 		});
 		
-		Button updateButton = createButton(createIcon("send.png"));
+		Button updateButton = createButton(createIcon("send.png"), "Datein an Server senden");
 		updateButton.setText("Datein an server senden");
 		updateButton.setOnAction(e -> {
 			File[] files =  new File[Main.tableData.size()]; 
@@ -156,10 +158,11 @@ public class UiEditor {
 		mainPane.setBottom(bottom);
 		
 		stage.setScene(new Scene(mainPane));
-		stage.setWidth(1024);
-		stage.setHeight(512 + 256);
+		stage.setWidth(1024 / 2);
+		stage.setHeight((512 + 256) / 2);
 		stage.getScene().getWindow().addEventFilter(WindowEvent.WINDOW_CLOSE_REQUEST, e -> {
 		});		
+		stage.setMaximized(true);
 		stage.show();
 	}
 	
@@ -179,10 +182,15 @@ public class UiEditor {
 		return imageView;
 	}
 	
-	private Button createButton(ImageView icon) {
+	private Button createButton(ImageView icon, String s) {
 		Button button = null;
 		button = new Button("", icon);
 		button.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+		
+		Tooltip t = new Tooltip(s);
+		t.setShowDelay(Duration.seconds(0.5));
+		t.setAutoFix(true);
+		button.setTooltip(t);
 		return button;
 	}
 	
@@ -221,7 +229,7 @@ public class UiEditor {
 		valid.setCellValueFactory(
 				new PropertyValueFactory<ValidFile, String>("FormatedDate"));
 
-		
+		valid.setComparator(new ValidComperator());
 		tableView.getColumns().add(name);
 		tableView.getColumns().add(valid);
 		tableView.getColumns().add(pathtofile);
